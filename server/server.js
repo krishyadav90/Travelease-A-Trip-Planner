@@ -18,11 +18,13 @@ app.use(express.json());
 // Serve static frontend files from the "build" folder
 app.use(express.static(path.join(__dirname, 'build')));
 
+// Supabase client setup
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// API route
 app.post('/api/chat', async (req, res) => {
   const { message } = req.body;
 
@@ -52,10 +54,7 @@ Give a helpful and engaging answer.
   res.json({ answer: result.response });
 });
 
-// 🔁 Catch-all: serve index.html for React Router support
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+
 
 app.listen(PORT, () => {
   console.log(`✅ Server listening on http://localhost:${PORT}`);
