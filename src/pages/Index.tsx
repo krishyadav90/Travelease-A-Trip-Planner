@@ -6,9 +6,6 @@ import PopularDestinations from "@/components/PopularDestinations";
 import ReviewsSection from "@/components/ReviewsSection";
 // SearchBar is no longer used here.
 import ChatBot from "@/components/ChatBot";
-import AboutSection from "@/components/AboutSection";
-import ContactSection from "@/components/ContactSection";
-import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import FooterSection from "@/components/FooterSection";
 
 interface SearchFilters {
