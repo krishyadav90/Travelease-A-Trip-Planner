@@ -1,13 +1,22 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
+
+// Needed for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static frontend files from the "build" folder
+app.use(express.static(path.join(__dirname, 'build')));
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -18,7 +27,7 @@ app.post('/api/chat', async (req, res) => {
   const { message } = req.body;
 
   const { data, error } = await supabase
-    .from('destinations') // 👈 change to your table name
+    .from('destinations')
     .select('*')
     .limit(10);
 
@@ -41,6 +50,11 @@ Give a helpful and engaging answer.
 
   const result = await ollamaResponse.json();
   res.json({ answer: result.response });
+});
+
+// 🔁 Catch-all: serve index.html for React Router support
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(PORT, () => {
