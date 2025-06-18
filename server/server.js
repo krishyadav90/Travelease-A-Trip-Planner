@@ -25,6 +25,13 @@ const supabase = createClient(
 );
 
 // API route
+
+// Root route for backend verification
+app.get('/', (req, res) => {
+  res.send('✅ Backend is working');
+});
+
+
 app.post('/api/chat', async (req, res) => {
   const { message } = req.body;
 
