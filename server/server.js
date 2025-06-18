@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -20,8 +20,8 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 // Supabase client setup
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
 // API route
@@ -35,7 +35,7 @@ app.post('/api/chat', async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+  const ollamaResponse = await fetch(`${process.env.BACKEND_URL}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
