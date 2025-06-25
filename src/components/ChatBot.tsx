@@ -92,63 +92,64 @@ const ChatBot = () => {
   }, [messages]);
 
   const getAIResponse = async (message: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('http://localhost:3001/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: message
-        }),
-      });
+  setIsLoading(true);
+  try {
+    const response = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'maya:latest',
+        stream: false,
+        messages: [
+          {
+            role: 'user',
+            content: message,
+          },
+        ],
+      }),
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Chat API error response:', errorText);
-        throw new Error(`Chat API request failed: ${response.status} ${response.statusText}`);
-      }
-
-      const rawResponse = await response.text();
-      console.log('Raw Chat API response:', rawResponse);
-      let data;
-      try {
-        data = JSON.parse(rawResponse);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response format from AI server');
-      }
-
-      if (!data.answer) {
-        console.error('No answer field in API data:', data);
-        throw new Error('AI response missing expected content');
-      }
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.answer.trim() || "Sorry, I couldn't generate a response. Please try again!",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiMessage]);
-
-    } catch (error) {
-      console.error("Error calling Chat API:", error);
-      
-      const predefinedAnswer = predefinedQA[message as keyof typeof predefinedQA];
-      
-      const fallbackMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: predefinedAnswer || `Oops, I couldn't connect to the AI server. ${error instanceof Error ? error.message : 'Please try again or check our website for more info!'}`,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, fallbackMessage]);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Chat API error response:', errorText);
+      throw new Error(`Chat API request failed: ${response.status} ${response.statusText}`);
     }
-  };
+
+    const data = await response.json();
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content:
+        data.message?.content?.trim() ||
+        "Sorry, I couldn't generate a response. Please try again!",
+      isUser: false,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, aiMessage]);
+  } catch (error) {
+    console.error('Error calling Chat API:', error);
+
+    const predefinedAnswer = predefinedQA[message as keyof typeof predefinedQA];
+
+    const fallbackMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content:
+        predefinedAnswer ||
+        `Oops, I couldn't connect to the AI server. ${
+          error instanceof Error ? error.message : 'Please try again or check our website for more info!'
+        }`,
+      isUser: false,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, fallbackMessage]);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleQuickQuestion = (question: string) => {
     const userMessage: Message = {
